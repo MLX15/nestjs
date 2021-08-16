@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+    db:
+        image: mysql:5.7
+        container_name: db-mysql
+        platform: linux/amd64
+        ports:
+            - 3306:3306
+        expose:
+            - 3306
+        environment:
+            MYSQL_DATABASE: nest
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: testuser
+            MYSQL_PASSWORD: testpassword
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d
+    dev:
+        container_name: nestjs_api_dev
+        image: nestjs-api-dev:1.0.0
+        build:
+            context: .
+            target: development
+            dockerfile: ./Dockerfile
+        command: npm run start:debug
+        ports:
+            - 3000:3000
+            - 9229:9229
+        volumes:
+            - .:/usr/src/app
+            - /usr/src/app/node_modules
+        depends_on: 
+            db:
+                condition: service_started
+
